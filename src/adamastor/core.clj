@@ -5,3 +5,7 @@
   (if (fn args)
     args
     nil))
+
+(defn get-text-from-file []
+  (clojure.string/split-lines
+    (slurp "./resources/test.md")))
