@@ -4,6 +4,6 @@
   :license {:name "MIT"
             :url "http://opensource.org/licenses/MIT"
             :distribution :repo}
-  :main com.uncrafted.adamastor
-  :aot [com.uncrafted.adamastor]
+  :main adamastor.core
+  :aot [adamastor.core]
   :dependencies [[org.clojure/clojure "1.6.0"]])
