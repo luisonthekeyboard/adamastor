@@ -14,5 +14,11 @@
   (is (= "token" (remove-whitespaces "   to   ken  \t ")))
   (is (= "token" (remove-whitespaces "   to \n  ken")))
   (is (= "token" (remove-whitespaces "to   ken \n  ")))
-  (is (= "" (remove-whitespaces "      ")))
-  )
+  (is (= "" (remove-whitespaces "      "))))
+
+(deftest test-only-contains
+  (is (true? (only-contains "abbaabbabbbaaababbbbababbababbaaaba" "ab")))
+  (is (true? (only-contains "" "")))
+  (is (true? (only-contains "ab" "abbabababbababbaabba")))
+  (is (false? (only-contains "" "ab")))
+  (is (false? (only-contains "ab" ""))))

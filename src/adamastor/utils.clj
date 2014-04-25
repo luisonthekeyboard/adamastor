@@ -16,7 +16,7 @@
   (if (empty? lines)
     nil
     (if (.startsWith (first lines) starter)
-      [starter (tokenize (first lines)) (into [](rest lines))]
+      [starter (tokenize (first lines)) (into [] (rest lines))]
       nil)))
 
 (defn ^:dynamic remove-whitespaces
@@ -24,11 +24,18 @@
   the whitespaces removed. A whitespace is defined according
   to java.lang.Character.isWhitespace. Actually, that's the method I'm using."
   [string]
-  (loop [string string result ""]
+  (loop [string string
+         result ""]
     (let [head (first string)
           tail (rest string)]
       (if (nil? head)
         result
         (recur tail (str
-            result
-            (if-not (java.lang.Character/isWhitespace head) head nil)))))))
+                      result
+                      (if-not (java.lang.Character/isWhitespace head) head nil)))))))
+
+(defn ^:dynamic only-contains
+  "Takes a string and a sequence of characters and returns true if the string
+  composed only of those characters."
+  [string admissable-characters]
+  (= (set string) (set admissable-characters)))
