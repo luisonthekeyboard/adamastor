@@ -1,5 +1,6 @@
 (ns adamastor.utils
-  (:use [clojure.string :only [trim split join]]))
+  (:use [clojure.string :only [trim split join]])
+  (:import java.lang.Character))
 
 
 (defn get-text-from-file []
@@ -17,3 +18,11 @@
     (if (.startsWith (first lines) starter)
       [starter (tokenize (first lines)) (into [](rest lines))]
       nil)))
+
+(defn ^:dynamic remove-whitespaces
+  [string]
+  (let [head (first string) tail (rest string)]
+    (if (nil? head) nil
+      (str
+        (if (not (java.lang.Character/isWhitespace head)) head nil)
+        (remove-whitespaces tail)))))
