@@ -36,6 +36,7 @@
 
 (defn ^:dynamic only-contains
   "Takes a string and a sequence of characters and returns true if the string
-  composed only of those characters."
+  composed only of those characters. Admissable characters can be either a string
+  or a Character."
   [string admissable-characters]
-  (= (set string) (set admissable-characters)))
+  (= (set string) (set (str admissable-characters))))

@@ -18,6 +18,8 @@
 
 (deftest test-only-contains
   (is (true? (only-contains "abbaabbabbbaaababbbbababbababbaaaba" "ab")))
+  (is (true? (only-contains "aaaaaaaaaaaaaaa" "a")))
+  (is (true? (only-contains "aaaaaaaaaaaaaaa" \a)))
   (is (true? (only-contains "" "")))
   (is (true? (only-contains "ab" "abbabababbababbaabba")))
   (is (false? (only-contains "" "ab")))
