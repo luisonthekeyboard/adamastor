@@ -1,4 +1,4 @@
-(defproject adamastor "0.1.0"
+(defproject adamastor "0.2.0"
   :description "Destroying caravels since the 1400s..."
   :url "https://github.com/luizsoarez/adamastor"
   :license {:name "MIT"
