@@ -20,9 +20,15 @@
       nil)))
 
 (defn ^:dynamic remove-whitespaces
+  "Takes a string as an input and returns a copy of the string with all
+  the whitespaces removed. A whitespace is defined according
+  to java.lang.Character.isWhitespace. Actually, that's the method I'm using."
   [string]
-  (let [head (first string) tail (rest string)]
-    (if (nil? head) nil
-      (str
-        (if (not (java.lang.Character/isWhitespace head)) head nil)
-        (remove-whitespaces tail)))))
+  (loop [string string result ""]
+    (let [head (first string)
+          tail (rest string)]
+      (if (nil? head)
+        result
+        (recur tail (str
+            result
+            (if-not (java.lang.Character/isWhitespace head) head nil)))))))
