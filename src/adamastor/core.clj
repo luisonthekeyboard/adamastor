@@ -7,6 +7,8 @@
     args
     nil))
 
+;; Utils
+
 (defn get-text-from-file []
   (clojure.string/split-lines
     (slurp "./resources/test.md")))
@@ -21,12 +23,23 @@
       [starter (tokenize (first lines)) (into [](rest lines))]
       nil)))
 
-(defn ^:dynamic magic [lines]
+;; matchers
+
+(defn ^:dynamic match-h1 [lines]
   (when-let [[hash text tail]
              (starts-with lines "#")]
     [[:h1 text] tail]))
 
+(defn ^:dynamic match-li [lines]
+  (when-let [[hash text tail]
+             (starts-with lines "*")]
+    [[:li text] tail]))
+
+(def matchers [match-li match-h1])
+
+; parser
+
 (defn ^:dynamic parse [lines]
   (when-let [[result remaining]
-             (magic lines)]
+             (some (fn [matcher] (matcher lines)) matchers)]
     (cons result (parse remaining))))
