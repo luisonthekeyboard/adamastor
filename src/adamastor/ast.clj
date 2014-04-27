@@ -32,6 +32,7 @@
              (some (fn [header-matcher] (header-matcher lines)) '(atx-header settext-header))]
   [[header-level header-text] tail]))
 
+
 (defn ^:dynamic horizontal-rule [lines]
   "You can produce a horizontal rule tag (<hr />) by placing
   three or more hyphens, asterisks, or underscores on a line
