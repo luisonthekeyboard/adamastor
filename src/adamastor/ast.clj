@@ -1,11 +1,29 @@
 (ns adamastor.ast
   (:use [adamastor.utils])
-  (:use [clojure.string :only [trim]]))
+  (:use [clojure.string :only [trim blank?]]))
 
 (def line-not-preceeded-by-hash #"^(?!# ).*$")
 (def line-only-with-dashes #"^-+$")
 (def line-only-with-equals #"^=+$")
 (def ast-header-line #"^(#+ )(.*)$")
+(def line-of-text #"^(?!#+ |[0-9]+\. |> |\*. |\+. |-. |    |\t).+$") ; A line of text is strictly one which does not match any other production.
+
+(defn break [string]
+  (if (matches #"^(.*)(  )$" string)
+    [(trim string) :br]
+    [(trim string)]))
+
+(defn ^:dynamic paragraph [lines]
+  (loop [lines lines
+         paragraph-text []]
+    (if (empty? lines)
+      [(into [:p] paragraph-text) (rest lines)]
+      (let [first-line (first lines) tail (rest lines)]
+        (if (or
+              (not (matches line-of-text first-line))
+              (blank? first-line))
+          [(into [:p] paragraph-text) lines]
+          (recur tail (into paragraph-text (break first-line))))))))
 
 (defn ^:dynamic settext-header [lines]
   "Setext-style headers are “underlined” using equal signs (for
@@ -29,7 +47,7 @@
   hashes don’t even need to match the number of hashes used
   to open the header. Luis: semantics for more than 6 # is that
   they are shortened to only 6."
-  (let [first-line (strip-ending-hashes (first lines))
+  (let [first-line (strip-ending-hashes (first lines))      ;I would prefer to ditch `strip-ending-hashes` and do the whole regexp in `ast-header-line`
         tail (rest lines)]
     (when-let [[line hashes header]
                (re-matches ast-header-line first-line)]

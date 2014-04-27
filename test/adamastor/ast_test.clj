@@ -41,3 +41,8 @@
   (is (= [[:h6 "header"] ()] (headers ["###### header"])))
   (is (= [[:h6 "header"] ()] (headers ["################## header"])))
   (is (nil? (headers ["##header"]))))
+
+;(deftest test-paragraph
+;  (is (= (paragraph ["third header" "hello [google](www.google.com)" " \t \t\n\n " "another paragraph"])
+;         [[:p "third header" "ola [google](www.google.com)"] `(" \t \t\n\n " "another paragraph")]))
+;  )
