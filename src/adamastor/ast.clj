@@ -1,9 +1,11 @@
 (ns adamastor.ast
-  (:use [adamastor.utils]))
+  (:use [adamastor.utils])
+  (:use [clojure.string :only [trim]]))
 
-(def line-not-preceeded-by-hash #"^(?!#).*$")
+(def line-not-preceeded-by-hash #"^(?!# ).*$")
 (def line-only-with-dashes #"^-+$")
 (def line-only-with-equals #"^=+$")
+(def ast-header-line #"^(#+ )(.*)$")
 
 (defn ^:dynamic settext-header [lines]
   "Setext-style headers are “underlined” using equal signs (for
@@ -19,17 +21,25 @@
         (matches line-only-with-dashes underline) [:h2 first-line tail]
         :else nil))))
 
+(defn ^:dynamic atx-header [lines]
+  "Atx-style headers use 1-6 hash characters at the start
+  of the line,  corresponding to header levels 1-6. Optionally,
+  you may “close” atx-style headers. This is purely cosmetic
+  — you can use this if you think it looks better. The closing
+  hashes don’t even need to match the number of hashes used
+  to open the header. Luis: semantics for more than 6 # is that
+  they are shortened to only 6."
+  (let [first-line (strip-ending-hashes (first lines))
+        tail (rest lines)]
+    (when-let [[line hashes header]
+               (re-matches ast-header-line first-line)]
+      [(keyword (str "h" (min 6 (count (trim hashes))))) (trim header) tail])))
+
 
 (defn ^:dynamic headers [lines]
-  "Markdown supports two styles of headers, Setext and atx.
-  Atx-style headers use 1-6 hash characters at the start of the line,
-  corresponding to header levels 1-6. Optionally, you may
-  “close” atx-style headers. This is purely cosmetic — you
-  can use this if you think it looks better. The closing
-  hashes don’t even need to match the number of hashes used
-  to open the header."
+  "Markdown supports two styles of headers, Setext and atx."
   (when-let [[header-level header-text tail]
-             (some (fn [header-matcher] (header-matcher lines)) '(atx-header settext-header))]
+             (some (fn [header-matcher] (header-matcher lines)) [atx-header settext-header])]
   [[header-level header-text] tail]))
 
 
@@ -46,5 +56,5 @@
             (only-contains (remove-whitespaces hr-line) character)
             (>= (get (frequencies hr-line) character) 3)))
         [\- \_ \*])
-      [[:rh ] tail]
+      [[:hr ] tail]
       false)))

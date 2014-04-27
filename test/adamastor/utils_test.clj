@@ -24,3 +24,10 @@
   (is (true? (only-contains "ab" "abbabababbababbaabba")))
   (is (false? (only-contains "" "ab")))
   (is (false? (only-contains "ab" ""))))
+
+(deftest test-strip-ending-hashes
+  (is (= (strip-ending-hashes "abbaabb") "abbaabb"))
+  (is (= (strip-ending-hashes "###### abbaabb") "###### abbaabb"))
+  (is (= (strip-ending-hashes "abbaabb #########") "abbaabb"))
+  (is (= (strip-ending-hashes "abbaabb#########") "abbaabb#########"))
+  )

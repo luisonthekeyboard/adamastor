@@ -2,6 +2,7 @@
   (:use [clojure.string :only [trim split join]])
   (:import java.lang.Character))
 
+(def hash-ending-string #"^(.*) (#+)$")
 
 ; to be deleted
 (defn get-text-from-file []
@@ -21,10 +22,23 @@
       [starter (tokenize (first lines)) (into [] (rest lines))]
       nil)))
 
-(defn matches [regexp string]
+(defn ^:dynamic strip-ending-hashes [string]
+  "Takes a string (possibly) ending with /space hash/ and returns a copy
+   without that ending."
+  (if-let [[whole-string minus-hashes hashes]
+           (re-matches hash-ending-string string)]
+    minus-hashes
+    string))
+
+
+(defn ^:dynamic matches [regexp string]
   "Checks if a regular expression matches a string.
    Will return true or false."
-  (not (nil? (re-matches regexp string))))
+  (cond
+    (nil? regexp) false
+    (nil? string) false
+    :else (not (nil? (re-matches regexp string)))))
+
 
 (defn ^:dynamic remove-whitespaces
   "Takes a string as an input and returns a copy of the string with all
