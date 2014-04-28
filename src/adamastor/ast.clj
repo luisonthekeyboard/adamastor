@@ -6,8 +6,8 @@
 (def line-only-with-dashes #"^-+$")
 (def line-only-with-equals #"^=+$")
 (def ast-header-line #"^(#+ )(.*)$")
-(def line-of-text #"^(?!#+ |[0-9]+\. |> |\*[\.]? |\+[\.]? |-[\.]? |    |\t).+$") ; A line of text is strictly one which does not match any other production.
-(def ul #"^ {0,3}(\*[\.]? |\+[\.]? |-[\.]? )(.+)$")
+(def line-of-text #"^(?!#+ |[0-9]+\. |> |\* |\+ |- |    |\t).+$") ; A line of text is strictly one which does not match any other production.
+(def ul #"^ {0,3}(\* |\+ |- )(.+)$")
 (def ol #"^ {0,3}([0-9]+\. )(.+)$")
 
 
