@@ -1,17 +1,17 @@
 (ns adamastor.ast
   (:use [adamastor.utils])
-  (:use [clojure.string :only [trim blank?]]))
+  (:use [clojure.string :only [trim trimr blank?]]))
 
 (def line-not-preceeded-by-hash #"^(?!# ).*$")
 (def line-only-with-dashes #"^-+$")
 (def line-only-with-equals #"^=+$")
 (def ast-header-line #"^(#+ )(.*)$")
-(def line-of-text #"^(?!#+ |[0-9]+\. |> |\*. |\+. |-. |    |\t).+$") ; A line of text is strictly one which does not match any other production.
+(def line-of-text #"^(?!#+ |[0-9]+\. |> |\*[\.]? |\+[\.]? |-[\.]? |    |\t).+$") ; A line of text is strictly one which does not match any other production.
 
 (defn break [string]
   (if (matches #"^(.*)(  )$" string)
-    [(trim string) :br]
-    [(trim string)]))
+    [(trimr string) :br]
+    [(trimr string)]))
 
 (defn ^:dynamic paragraph [lines]
   (loop [lines lines
@@ -22,7 +22,9 @@
         (if (or
               (not (matches line-of-text first-line))
               (blank? first-line))
-          [(into [:p] paragraph-text) lines]
+          (if (empty? paragraph-text)
+            lines
+            [(into [:p] paragraph-text) lines])
           (recur tail (into paragraph-text (break first-line))))))))
 
 (defn ^:dynamic settext-header [lines]

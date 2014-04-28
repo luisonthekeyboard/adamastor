@@ -42,7 +42,22 @@
   (is (= [[:h6 "header"] ()] (headers ["################## header"])))
   (is (nil? (headers ["##header"]))))
 
-;(deftest test-paragraph
-;  (is (= (paragraph ["third header" "hello [google](www.google.com)" " \t \t\n\n " "another paragraph"])
-;         [[:p "third header" "ola [google](www.google.com)"] `(" \t \t\n\n " "another paragraph")]))
-;  )
+(deftest test-paragraph
+  (is (=
+        (paragraph ["here's a" " text which is nice." " \t \t\n\n " "that was a blank line"])
+        [[:p "here's a" " text which is nice."] `(" \t \t\n\n " "that was a blank line")]))
+  (is (=
+        (paragraph ["here's a" " text which is nice.   " "and that was a <br />"])
+        [[:p "here's a" " text which is nice." :br "and that was a <br />"] ()]))
+  (is (= (paragraph ["\ttest"]) ["\ttest"]))
+  (is (= (paragraph ["    test"]) ["    test"]))
+  (is (= (paragraph ["> test"]) ["> test"]))
+  (is (= (paragraph ["* test"]) ["* test"]))
+  (is (= (paragraph ["*. test"]) ["*. test"]))
+  (is (= (paragraph ["- test"]) ["- test"]))
+  (is (= (paragraph ["-. test"]) ["-. test"]))
+  (is (= (paragraph ["+ test"]) ["+ test"]))
+  (is (= (paragraph ["+. test"]) ["+. test"]))
+  (is (= (paragraph ["1 test"]) [[:p "1 test"] ()]))
+  (is (= (paragraph ["1. test"]) ["1. test"]))
+  (is (= (paragraph ["## test"]) ["## test"])))
