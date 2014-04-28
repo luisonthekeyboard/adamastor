@@ -7,8 +7,8 @@
 (def line-only-with-equals #"^=+$")
 (def ast-header-line #"^(#+ )(.*)$")
 (def line-of-text #"^(?!#+ |[0-9]+\. |> |\*[\.]? |\+[\.]? |-[\.]? |    |\t).+$") ; A line of text is strictly one which does not match any other production.
-(def ul #"^(\*[\.]? |\+[\.]? |-[\.]? )(.+)$")
-(def ol #"^([0-9]+\. )(.+)$")
+(def ul #"^ {0,3}(\*[\.]? |\+[\.]? |-[\.]? )(.+)$")
+(def ol #"^ {0,3}([0-9]+\. )(.+)$")
 
 
 (defn ^:dynamic list-item [list-items lines]
@@ -23,6 +23,12 @@
 
 
 (defn ^:dynamic list-block [lines]
+  "Unordered lists use asterisks, pluses, and hyphens — interchangably —
+  as list markers. Ordered lists use numbers followed by periods. Tthe actual
+  numbers you use to mark the list have no effect on the HTML output
+  Markdown produces. List markers typically start at the left margin, but may
+  be indented by up to three spaces. List markers must be followed by one
+  or more spaces or a tab."
   (cond
     (matches ul (first lines)) (list-item [:ul] lines)
     (matches ol (first lines)) (list-item [:ol] lines)

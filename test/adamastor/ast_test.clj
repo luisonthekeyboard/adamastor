@@ -64,9 +64,10 @@
 
 (deftest test-lists
   (is (= (list-block ["* item"]) [:ul [:li "item"]]))
-  (is (= (list-block ["- item"]) [:ul [:li "item"]]))
-  (is (= (list-block ["+ item"]) [:ul [:li "item"]]))
-  (is (= (list-block ["1. item"]) [:ol [:li "item"]]))
-  (is (= (list-block ["+ item" "1. another" "34. another"]) [:ul [:li "item"][:li "another"][:li "another"]]))
-  (is (= (list-block ["1. item" "- another" "+ another"]) [:ol [:li "item"] [:li "another"] [:li "another"]]))
-  )
+  (is (= (list-block [" - item"]) [:ul [:li "item"]]))
+  (is (= (list-block ["  + item"]) [:ul [:li "item"]]))
+  (is (= (list-block ["   1. item"]) [:ol [:li "item"]]))
+  (is (= (list-block [" + item" "1. another" " 34. another"]) [:ul [:li "item"][:li "another"][:li "another"]]))
+  (is (= (list-block ["   1. item" "  - another" "   + another"]) [:ol [:li "item"] [:li "another"] [:li "another"]]))
+  (is (nil? (list-block ["    * item"])))
+  (is (= (list-block ["* item" "    * item"]) [[:ul [:li "item"]] `("    * item")])))
