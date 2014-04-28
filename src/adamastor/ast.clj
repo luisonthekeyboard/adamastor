@@ -7,8 +7,8 @@
 (def line-only-with-equals #"^=+$")
 (def ast-header-line #"^(#+ )(.*)$")
 (def line-of-text #"^(?!#+ |[0-9]+\. |> |\* |\+ |- |    |\t).+$") ; A line of text is strictly one which does not match any other production.
-(def ul #"^ {0,3}(\* |\+ |- )(.+)$")
-(def ol #"^ {0,3}([0-9]+\. )(.+)$")
+(def ul #"^ {0,3}(\*|\+|-)( +|\t)(.+)$")
+(def ol #"^ {0,3}([0-9]+\.)( +|\t)(\b.+)$")
 
 
 (defn ^:dynamic list-item [list-items lines]
@@ -16,7 +16,7 @@
            lines lines]
       (if (empty? lines)
         list-items
-        (if-let [[whole-line marker item]
+        (if-let [[whole-line marker space item]
                (some (fn [pattern] (re-matches pattern (first lines))) [ul ol])]
         (recur (conj list-items [:li item]) (rest lines))
         [list-items lines]))))
@@ -48,7 +48,8 @@
       [(into [:p] paragraph-text) (rest lines)]
       (let [first-line (first lines) tail (rest lines)]
         (if (or
-              (not (matches line-of-text first-line))
+             ;(not (matches line-of-text first-line))
+              (some (fn [pattern] (matches pattern first-line)) [ast-header-line ul ol]) ;updated it with code and blockquote later as well plus the test
               (blank? first-line))
           (if (empty? paragraph-text)
             lines
