@@ -1,17 +1,33 @@
 (ns adamastor.ast
   (:use [adamastor.utils])
-  (:use [clojure.string :only [trim trimr blank?]]))
+  (:use [clojure.string :only [trim blank?]]))
 
 (def line-not-preceeded-by-hash #"^(?!# ).*$")
 (def line-only-with-dashes #"^-+$")
 (def line-only-with-equals #"^=+$")
 (def ast-header-line #"^(#+ )(.*)$")
 (def line-of-text #"^(?!#+ |[0-9]+\. |> |\*[\.]? |\+[\.]? |-[\.]? |    |\t).+$") ; A line of text is strictly one which does not match any other production.
+(def ul #"^(\*[\.]? |\+[\.]? |-[\.]? )(.+)$")
+(def ol #"^([0-9]+\. )(.+)$")
 
-(defn break [string]
-  (if (matches #"^(.*)(  )$" string)
-    [(trimr string) :br]
-    [(trimr string)]))
+
+(defn ^:dynamic list-item [list-items lines]
+    (loop [list-items list-items
+           lines lines]
+      (if (empty? lines)
+        list-items
+        (if-let [[whole-line marker item]
+               (some (fn [pattern] (re-matches pattern (first lines))) [ul ol])]
+        (recur (conj list-items [:li item]) (rest lines))
+        [list-items lines]))))
+
+
+(defn ^:dynamic list-block [lines]
+  (cond
+    (matches ul (first lines)) (list-item [:ul] lines)
+    (matches ol (first lines)) (list-item [:ol] lines)
+    :else nil))
+
 
 (defn ^:dynamic paragraph [lines]
   "A paragraph is simply one or more consecutive lines of text, separated by
@@ -33,6 +49,7 @@
             [(into [:p] paragraph-text) lines])
           (recur tail (into paragraph-text (break first-line))))))))
 
+
 (defn ^:dynamic settext-header [lines]
   "Setext-style headers are “underlined” using equal signs (for
    first-level headers) and dashes (for second-level headers).
@@ -47,10 +64,11 @@
         (matches line-only-with-dashes underline) [:h2 first-line tail]
         :else nil))))
 
+
 (defn ^:dynamic atx-header [lines]
   "Atx-style headers use 1-6 hash characters at the start
   of the line,  corresponding to header levels 1-6. Optionally,
-  you may “close” atx-style headers. This is purely cosmetic
+  you may “close” atx-style headers. This is pu rely cosmetic
   — you can use this if you think it looks better. The closing
   hashes don’t even need to match the number of hashes used
   to open the header. Luis: semantics for more than 6 # is that

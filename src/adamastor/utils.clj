@@ -1,5 +1,5 @@
 (ns adamastor.utils
-  (:use [clojure.string :only [trim split join]])
+  (:use [clojure.string :only [trim trimr split join]])
   (:import java.lang.Character))
 
 (def hash-ending-string #"^(.*) (#+)$")
@@ -38,6 +38,12 @@
     (nil? regexp) false
     (nil? string) false
     :else (not (nil? (re-matches regexp string)))))
+
+
+(defn break [string]
+  (if (matches #"^(.*)(  )$" string)
+    [(trimr string) :br]
+    [(trimr string)]))
 
 
 (defn ^:dynamic remove-whitespaces
