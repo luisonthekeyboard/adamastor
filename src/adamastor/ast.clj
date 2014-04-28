@@ -8,7 +8,7 @@
 (def ast-header-line #"^(#+ )(.*)$")
 (def line-of-text #"^(?!#+ |[0-9]+\. |> |\* |\+ |- |    |\t).+$") ; A line of text is strictly one which does not match any other production.
 (def ul #"^ {0,3}(\*|\+|-)( +|\t)(.+)$")
-(def ol #"^ {0,3}([0-9]+\.)( +|\t)(\b.+)$")
+(def ol #"^ {0,3}([0-9]+\.)( +|\t)(.+)$")
 
 
 (defn ^:dynamic list-item [list-items lines]
