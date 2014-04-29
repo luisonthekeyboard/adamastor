@@ -33,26 +33,6 @@
     {:marker nil
      :text nil}))
 
-; (enclose :p [:li "suren" "faren" :br "meran"])
-;                  ==>
-;    [:li [:p "suren" "faren" :br "meran"]]
-(defn ^:dynamic enclose
-  "Encloses the rest of vector v in elm and then again in first of vector.
-  In other words, `(enclose :p [:li \"suren\" \"faren\" :br \"meran\"])` will return
-  `[:li [:p \"suren\" \"faren\" :br \"meran\"]]`. The function is smart enough to not
-  do the operation in case the vector inside is already enclosed."
-  [elm v]
-  (if (and (vector? (second v)) (= elm (first (second v))))
-    v
-    (conj [(first v)] (into [elm] (rest v)))))
-
-(defn ^:dynamic merge-item [item v]
-  (if (vector? (last v))
-    (conj
-      (vec (drop-last v))
-      (merge-item item (last v)))
-    (into v item)))
-
 (defn ^:dynamic list-item [list-items lines]
   (loop [list-items list-items
          lines lines]
