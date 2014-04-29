@@ -11,19 +11,28 @@
 (def ol #"^ {0,3}([0-9]+\.)( +|\t)(.+)$")
 
 
+(defn ^:dynamic unordered-list [str]
+  (when-let [parts (re-matches ul str)]
+    {:marker :ul
+     :text (last parts)}))
+
+(defn ^:dynamic ordered-list [str]
+  (when-let [parts (re-matches ol str)]
+    {:marker :ol
+     :text (last parts)}))
+
 (defn ^:dynamic list-item [list-items lines]
     (loop [list-items list-items
            lines lines]
       (if (empty? lines)
         list-items
-        (if-let [[whole-line marker space item]
-               (some (fn [pattern] (re-matches pattern (first lines))) [ul ol])]
-        (recur (conj list-items [:li item]) (rest lines))
-        [list-items lines]))))
+        (if-let [item-as-map (some #(% (first lines)) [unordered-list ordered-list])]
+          (recur (conj list-items [:li (:text item-as-map)]) (rest lines))
+          [list-items lines]))))
 
 
 (defn ^:dynamic list-block [lines]
-  "Unordered lists use asterisks, pluses, and hyphens — interchangably —
+  "Unordered lists use asterisks, pluses, and hyphens - interchangably -
   as list markers. Ordered lists use numbers followed by periods. Tthe actual
   numbers you use to mark the list have no effect on the HTML output
   Markdown produces. List markers typically start at the left margin, but may
