@@ -8,6 +8,42 @@
 (def ast-header-line #"^(#+ )(.*)$")
 (def ul #"^ {0,3}(\*|\+|-)( +|\t)(.+)$")
 (def ol #"^ {0,3}([0-9]+\.)( +|\t)(.+)$")
+(def blockquote-line #"^ {0,3}>(.+)$")
+
+(defn ^:dynamic standard-blockquote [str]
+  (when-let [parts (re-matches blockquote-line str)]
+    {:text (break (triml (second parts)))}))
+
+(defn ^:dynamic unmarked-blockquote [str]
+  (when (not (blank? str))
+    (when-let [parts (re-matches #"^(.+)$" str)]
+      {:text (break (triml (last parts)))})))
+
+(defn ^:dynamic blockquote-item [quoted-items lines]
+  (loop [quoted-items quoted-items
+         lines lines]
+    (if (empty? lines)
+      quoted-items
+      (if-let [item-as-map (some #(% (first lines)) [standard-blockquote unmarked-blockquote])]
+        (cond
+          (not (nil? (:text item-as-map)))
+            (recur (into quoted-items (:text item-as-map)) (rest lines))
+          :else nil
+          ) ;cond
+        ) ; if-let
+      ) ;if
+    ) ;loop
+  )
+
+(defn ^:dynamic blockquote [lines]
+  "Markdown uses email-style > characters for blockquoting. It looks best if you
+  hard wrap the text and put a > before every line. Markdown allows you to be lazy
+  and only put the > before the first line of a hard-wrapped paragraph. Blockquotes
+  can be nested (i.e. a blockquote-in-a-blockquote) by adding additional levels of >.
+  Blockquotes can contain other Markdown elements, including headers, lists, and
+  code blocks."
+  (when (matches blockquote-line (first lines))
+    (blockquote-item [:blockquote ] lines)))
 
 
 (defn ^:dynamic unordered-list-item [str]
@@ -40,24 +76,17 @@
       list-items
       (if-let [item-as-map (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item blank-item])]
         (cond
-
-          (not (nil? (:marker item-as-map))) (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
-
+          (not (nil? (:marker item-as-map)))
+            (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
           (not (nil? (:text item-as-map)))
             (recur
-              (conj
-                 (vec (drop-last list-items))
-                 (merge-item (:text item-as-map) (last list-items)))
+              (conj (vec (drop-last list-items)) (merge-item (:text item-as-map) (last list-items)))
               (rest lines))
-
           :else
             (when-let [next-item ;; if next line is another standard item
                       (some #(% (first (rest lines))) [unordered-list-item ordered-list-item unmarked-item])]
               (recur
-                (conj
-                  (vec (drop-last list-items))
-                  (enclose :p (last list-items))
-                  (enclose :p (into [:li ] (:text next-item))))
+                (conj (vec (drop-last list-items)) (enclose :p (last list-items)) (enclose :p (into [:li ] (:text next-item))))
                 (drop 1 (rest lines)))))
         [list-items lines]))))
 

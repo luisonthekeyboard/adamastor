@@ -79,3 +79,8 @@
          [:ul [:li [:p "111" "222" "333" "35353535"]] [:li [:p "444" "555"]] [:li [:p "666" "*different thing"]]]))
   (is (= (list-block ["* 111" "\t222" "\t333" "\t35353535" "" "444" "555" "" "* 666" "* different thing"])
          [:ul [:li [:p "111" "222" "333" "35353535"]] [:li [:p "444" "555"]] [:li [:p "666"]] [:li "different thing"]])))
+
+(deftest test-blockquotes
+  (is (= (blockquote ["   > luis" "bipi"]) [:blockquote "luis" "bipi"]))
+  (is (= (blockquote ["   > luis" "> bipi"]) [:blockquote "luis" "bipi"]))
+  (is (= (blockquote ["   > luis" ">bipi"]) [:blockquote "luis" "bipi"])))
