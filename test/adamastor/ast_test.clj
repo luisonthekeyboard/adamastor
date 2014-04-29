@@ -65,4 +65,6 @@
   (is (nil? (list-block ["    * item"])))
   (is (not= (list-block ["* item" "    * item"]) [[:ul [:li "item"] [:li "item"]]]))
   (is (= (list-block ["1. item" "another  " "another" "2. final"]) [:ol [:li "item" "another" :br "another"] [:li "final"]]))
-  )
+  (is (= (list-block ["* 111  " "1 e meio" "" "* 222"]) [:ul [:li [:p "111" :br "1 e meio"]] [:li [:p "222"]]]))
+  (is (= (list-block ["* 111  " "1 e meio" "" "* 222" "* 333"])) [:ul [:li [:p "111" :br "1 e meio"]] [:li [:p "222"]] [:li "333"]])
+  (is (= (list-block ["* 111  " "1 e meio" "" "* 222" "" "* 333"])) [:ul [:li [:p "111" :br "1 e meio"]] [:li [:p "222"]] [:li [:p "333"]]]))
