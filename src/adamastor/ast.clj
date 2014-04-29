@@ -46,6 +46,13 @@
     v
     (conj [(first v)] (into [elm] (rest v)))))
 
+(defn ^:dynamic merge-item [item v]
+  (if (vector? (last v))
+    (conj
+      (vec (drop-last v))
+      (merge-item item (last v)))
+    (into v item)))
+
 (defn ^:dynamic list-item [list-items lines]
   (loop [list-items list-items
          lines lines]
@@ -53,13 +60,25 @@
       list-items
       (if-let [item-as-map (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item blank-item])]
         (cond
+
           (not (nil? (:marker item-as-map))) (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
-          (not (nil? (:text item-as-map))) (recur (conj (vec (drop-last list-items)) (into (last list-items) (:text item-as-map))) (rest lines))
-          :else (when-let [next-item ;; if next line is another standard item
-                         (some #(% (first (rest lines))) [unordered-list-item ordered-list-item])]
-                  (recur
-                    (conj (vec (drop-last list-items)) (enclose :p (last list-items)) (enclose :p (into [:li ] (:text next-item))))
-                    (drop 1 (rest lines)))))
+
+          (not (nil? (:text item-as-map)))
+            (recur
+              (conj
+                 (vec (drop-last list-items))
+                 (merge-item (:text item-as-map) (last list-items)))
+              (rest lines))
+
+          :else
+            (when-let [next-item ;; if next line is another standard item
+                      (some #(% (first (rest lines))) [unordered-list-item ordered-list-item unmarked-item])]
+              (recur
+                (conj
+                  (vec (drop-last list-items))
+                  (enclose :p (last list-items))
+                  (enclose :p (into [:li ] (:text next-item))))
+                (drop 1 (rest lines)))))
         [list-items lines]))))
 
 
