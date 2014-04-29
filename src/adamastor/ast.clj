@@ -24,7 +24,7 @@
   (when (and
           (not (blank? str))
           (not (matches ast-header-line str)))
-    (when-let [parts (re-matches #"^( |\t)*([^*].+)$" str)]
+    (when-let [parts (re-matches #"^(.+)$" str)]
       {:marker nil
        :text (break (triml (last parts)))})))
 
