@@ -1,34 +1,43 @@
 (ns adamastor.ast
   (:use [adamastor.utils])
-  (:use [clojure.string :only [trim blank?]]))
+  (:use [clojure.string :only [triml trim blank?]]))
 
 (def line-not-preceeded-by-hash #"^(?!# ).*$")
 (def line-only-with-dashes #"^-+$")
 (def line-only-with-equals #"^=+$")
 (def ast-header-line #"^(#+ )(.*)$")
-(def line-of-text #"^(?!#+ |[0-9]+\. |> |\* |\+ |- |    |\t).+$") ; A line of text is strictly one which does not match any other production.
 (def ul #"^ {0,3}(\*|\+|-)( +|\t)(.+)$")
 (def ol #"^ {0,3}([0-9]+\.)( +|\t)(.+)$")
 
 
-(defn ^:dynamic unordered-list [str]
+(defn ^:dynamic unordered-list-item [str]
   (when-let [parts (re-matches ul str)]
     {:marker :ul
-     :text (last parts)}))
+     :text (break (triml (last parts)))}))
 
-(defn ^:dynamic ordered-list [str]
+(defn ^:dynamic ordered-list-item [str]
   (when-let [parts (re-matches ol str)]
     {:marker :ol
-     :text (last parts)}))
+     :text (break (triml (last parts)))}))
+
+(defn ^:dynamic unmarked-item [str]
+  (when (and
+          (not (blank? str))
+          (not (matches ast-header-line str)))
+    (when-let [parts (re-matches #"^( |\t)*([^*].+)$" str)]
+      {:marker nil
+       :text (break (triml (last parts)))})))
 
 (defn ^:dynamic list-item [list-items lines]
-    (loop [list-items list-items
-           lines lines]
-      (if (empty? lines)
-        list-items
-        (if-let [item-as-map (some #(% (first lines)) [unordered-list ordered-list])]
-          (recur (conj list-items [:li (:text item-as-map)]) (rest lines))
-          [list-items lines]))))
+  (loop [list-items list-items
+         lines lines]
+    (if (empty? lines)
+      list-items
+      (if-let [item-as-map (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item])]
+        (cond
+          (not (nil? (:marker item-as-map))) (recur (conj list-items (into [:li] (:text item-as-map))) (rest lines))
+          :else (recur (conj (vec (drop-last list-items)) (into (last list-items) (:text item-as-map))) (rest lines)))
+        [list-items lines]))))
 
 
 (defn ^:dynamic list-block [lines]
@@ -39,8 +48,8 @@
   be indented by up to three spaces. List markers must be followed by one
   or more spaces or a tab."
   (cond
-    (matches ul (first lines)) (list-item [:ul] lines)
-    (matches ol (first lines)) (list-item [:ol] lines)
+    (matches ul (first lines)) (list-item [:ul ] lines)
+    (matches ol (first lines)) (list-item [:ol ] lines)
     :else nil))
 
 
@@ -54,15 +63,14 @@
   (loop [lines lines
          paragraph-text []]
     (if (empty? lines)
-      [(into [:p] paragraph-text) (rest lines)]
+      [(into [:p ] paragraph-text) (rest lines)]
       (let [first-line (first lines) tail (rest lines)]
         (if (or
-             ;(not (matches line-of-text first-line))
               (some (fn [pattern] (matches pattern first-line)) [ast-header-line ul ol]) ;updated it with code and blockquote later as well plus the test
               (blank? first-line))
           (if (empty? paragraph-text)
             lines
-            [(into [:p] paragraph-text) lines])
+            [(into [:p ] paragraph-text) lines])
           (recur tail (into paragraph-text (break first-line))))))))
 
 
@@ -89,7 +97,7 @@
   hashes don’t even need to match the number of hashes used
   to open the header. Luis: semantics for more than 6 # is that
   they are shortened to only 6."
-  (let [first-line (strip-ending-hashes (first lines))      ;I would prefer to ditch `strip-ending-hashes` and do the whole regexp in `ast-header-line`
+  (let [first-line (strip-ending-hashes (first lines)) ;I would prefer to ditch `strip-ending-hashes` and do the whole regexp in `ast-header-line`
         tail (rest lines)]
     (when-let [[line hashes header]
                (re-matches ast-header-line first-line)]
@@ -100,7 +108,7 @@
   "Markdown supports two styles of headers, Setext and atx."
   (when-let [[header-level header-text tail]
              (some (fn [header-matcher] (header-matcher lines)) [atx-header settext-header])]
-  [[header-level header-text] tail]))
+    [[header-level header-text] tail]))
 
 
 (defn ^:dynamic horizontal-rule [lines]
