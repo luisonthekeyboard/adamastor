@@ -81,6 +81,14 @@
          [:ul [:li [:p "111" "222" "333" "35353535"]] [:li [:p "444" "555"]] [:li [:p "666"]] [:li "different thing"]])))
 
 (deftest test-blockquotes
-  (is (= (blockquote ["   > luis" "bipi"]) [:blockquote "luis" "bipi"]))
-  (is (= (blockquote ["   > luis" "> bipi"]) [:blockquote "luis" "bipi"]))
-  (is (= (blockquote ["   > luis" ">bipi"]) [:blockquote "luis" "bipi"])))
+  (is (= (blockquote ["   > luis" "bipi"]) [:blockquote [:qi "luis" "bipi"]]))
+  (is (= (blockquote ["   > luis" "> bipi"]) [:blockquote [:qi "luis" "bipi"]]))
+  (is (= (blockquote ["   > luis" ">bipi"]) [:blockquote [:qi "luis" "bipi"]]))
+  (is (= (blockquote ["> luis" "bipi" "" "> teofilo"])
+         [:blockquote [:qi [:p "luis" "bipi"]] [:qi [:p "teofilo"]]]))
+  (is (= (blockquote ["> luis" "bipi" "" "> teofilo" "nothing" "under" "the sun" "       " "> and one more"])
+      [:blockquote [:qi [:p "luis" "bipi"]] [:qi [:p "teofilo" "nothing" "under" "the sun"]] [:qi [:p "and one more"]]]))
+  (is (= (blockquote ["> luis" "bipi" "> teofilo" "nothing" "under" "the sun" "> and one more"])
+          [:blockquote [:qi "luis" "bipi" "teofilo" "nothing" "under" "the sun" "and one more"]]))
+  (is (= (blockquote ["> luis" "bipi" "> teofilo" "nothing  " "under  " "the sun" "> and one more"])
+         [:blockquote [:qi "luis" "bipi" "teofilo" "nothing" :br "under" :br "the sun" "and one more"]])))

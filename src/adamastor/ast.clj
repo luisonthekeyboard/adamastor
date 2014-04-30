@@ -11,24 +11,46 @@
 (def blockquote-line #"^ {0,3}>(.+)$")
 
 (defn ^:dynamic standard-blockquote [str]
-  (when-let [parts (re-matches blockquote-line str)]
-    {:text (break (triml (second parts)))}))
+  (when-not (= ">" (trim str))
+    (when-let [parts (re-matches blockquote-line str)]
+      {:text (break (triml (second parts)))})))
 
 (defn ^:dynamic unmarked-blockquote [str]
-  (when (not (blank? str))
-    (when-let [parts (re-matches #"^(.+)$" str)]
-      {:text (break (triml (last parts)))})))
+  (when-not (= ">" (trim str))
+    (when (not (blank? str))
+      (when-let [parts (re-matches #"^(.+)$" str)]
+        {:text (break (triml (last parts)))}))))
+
+(defn ^:dynamic blank-line-blockquote [str]
+  (when (or (blank? str) (= ">" (trim str)))
+    {:text nil}))
 
 (defn ^:dynamic blockquote-item [quoted-items lines]
   (loop [quoted-items quoted-items
          lines lines]
     (if (empty? lines)
       quoted-items
-      (if-let [item-as-map (some #(% (first lines)) [standard-blockquote unmarked-blockquote])]
+      (if-let [item-as-map (some #(% (first lines)) [standard-blockquote unmarked-blockquote blank-line-blockquote])]
+
         (cond
           (not (nil? (:text item-as-map)))
-            (recur (into quoted-items (:text item-as-map)) (rest lines))
-          :else nil
+              (recur
+                (add-element (into [:qi ] (:text item-as-map)) quoted-items)
+                (rest lines))
+
+          :else ;we have ourselves a blank line
+          (if (nil? (first (rest lines)))
+            quoted-items
+            (when-let [next-item ;; if next line is another standard item
+                       (some #(% (first (rest lines))) [standard-blockquote unmarked-blockquote])]
+                (recur
+                  (conj
+                    (vec (drop-last quoted-items))
+                    (enclose :p (last quoted-items))
+                    (enclose :p (into [:qi ] (:text next-item))))
+                  (drop 1 (rest lines)))
+              ) ;when-let
+            ); if
           ) ;cond
         ) ; if-let
       ) ;if
@@ -44,7 +66,6 @@
   code blocks."
   (when (matches blockquote-line (first lines))
     (blockquote-item [:blockquote ] lines)))
-
 
 (defn ^:dynamic unordered-list-item [str]
   (when-let [parts (re-matches ul str)]
@@ -80,13 +101,19 @@
             (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
           (not (nil? (:text item-as-map)))
             (recur
-              (conj (vec (drop-last list-items)) (merge-item (:text item-as-map) (last list-items)))
+              (conj
+                (vec (drop-last list-items))
+                (merge-item (:text item-as-map) (last list-items)))
               (rest lines))
+
           :else
             (when-let [next-item ;; if next line is another standard item
                       (some #(% (first (rest lines))) [unordered-list-item ordered-list-item unmarked-item])]
               (recur
-                (conj (vec (drop-last list-items)) (enclose :p (last list-items)) (enclose :p (into [:li ] (:text next-item))))
+                (conj
+                  (vec (drop-last list-items))
+                  (enclose :p (last list-items))
+                  (enclose :p (into [:li ] (:text next-item))))
                 (drop 1 (rest lines)))))
         [list-items lines]))))
 
