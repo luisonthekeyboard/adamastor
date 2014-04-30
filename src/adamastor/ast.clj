@@ -117,7 +117,6 @@
                 (drop 1 (rest lines)))))
         [list-items lines]))))
 
-
 (defn ^:dynamic list-block [lines]
   "Unordered lists use asterisks, pluses, and hyphens - interchangably -
   as list markers. Ordered lists use numbers followed by periods. Tthe actual
@@ -129,7 +128,6 @@
     (matches ul (first lines)) (list-item [:ul ] lines)
     (matches ol (first lines)) (list-item [:ol ] lines)
     :else nil))
-
 
 (defn ^:dynamic paragraph [lines]
   "A paragraph is simply one or more consecutive lines of text, separated by
@@ -151,7 +149,6 @@
             [(into [:p ] paragraph-text) lines])
           (recur tail (into paragraph-text (break first-line))))))))
 
-
 (defn ^:dynamic settext-header [lines]
   "Setext-style headers are “underlined” using equal signs (for
    first-level headers) and dashes (for second-level headers).
@@ -165,7 +162,6 @@
         (matches line-only-with-equals underline) [:h1 first-line tail]
         (matches line-only-with-dashes underline) [:h2 first-line tail]
         :else nil))))
-
 
 (defn ^:dynamic atx-header [lines]
   "Atx-style headers use 1-6 hash characters at the start

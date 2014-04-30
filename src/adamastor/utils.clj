@@ -73,3 +73,18 @@
       (vec (drop-last v))
       (merge-item item (last v)))
     (into v item)))
+
+(defn ^:dynamic add-element [item v]
+  (cond
+    (= 1 (count v))  (conj v item)
+    (string? (last v)) (conj v item)
+    (vector? (last v))
+      (if (and (vector? item) (= (first (last v)) (first item)))
+        (merge-item (drop 1 item) v)
+        (conj
+          (vec (drop-last v))
+          (add-element item (last v))))
+
+
+    )
+  )
