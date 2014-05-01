@@ -8,7 +8,7 @@
 (def ast-header-line #"^(#+ )(.*)$")
 (def ul #"^ {0,3}(\*|\+|-)( +|\t)(.+)$")
 (def ol #"^ {0,3}([0-9]+\.)( +|\t)(.+)$")
-(def blockquote-line #"^ {0,3}>(.+)$")
+
 
 (defn ^:dynamic atx-header [lines]
   "Atx-style headers use 1-6 hash characters at the start

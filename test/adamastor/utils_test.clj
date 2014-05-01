@@ -51,3 +51,7 @@
         [:li [:p "suren" :br "meran" "faren"]]))
   (is (= (merge-enclosable [:li [:h1 "suren"] "faren"])
         [:li [:h1 "suren"] "faren"])))
+
+(deftest test-strip-starting-quote
+  (is (= (strip-starting-quote "   > #luis") " #luis"))
+  (is (= (strip-starting-quote "    > #luis") "    > #luis")))

@@ -1,9 +1,10 @@
 (ns adamastor.utils
-  (:use [clojure.string :only [trim trimr split join]])
+  (:use [clojure.string :only [trim triml trimr split join]])
   (:import java.lang.Character))
 
 (def hash-ending-string #"^(.*) (#+)$")
 (def enclosable [:p ])
+(def blockquote-line #"^ {0,3}>(.+)$")
 
 ; to be deleted
 (defn get-text-from-file []
@@ -95,3 +96,13 @@
     (if (and (vector? item) (same-head (last v) item))
       (conj (vec (drop-last v)) (merge-enclosable (merge-item (last v) item)))
       (conj (vec (drop-last v)) (add-element item (last v))))))
+
+(defn ^:dynamic strip-starting-quote [string]
+  (if (matches blockquote-line string)
+    (join (rest (triml string)))
+    string))
+
+;(defn ^:dynamic strip-starting-quotes [lines]
+;  (when-not (every? blank? (take 2 lines))
+;
+;    ))
