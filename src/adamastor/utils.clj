@@ -3,7 +3,7 @@
   (:import java.lang.Character))
 
 (def hash-ending-string #"^(.*) (#+)$")
-(def enclosable [:p])
+(def enclosable [:p ])
 
 ; to be deleted
 (defn get-text-from-file []
@@ -31,7 +31,7 @@
 
 (defn break [string]
   (if (matches #"^(.*)(  )$" string)
-    [(trimr string) :br]
+    [(trimr string) :br ]
     [(trimr string)]))
 
 
@@ -82,13 +82,16 @@
     (conj (vec (drop-last 2 v)) (conj (second (reverse v)) (last v)))
     v))
 
+(defn ^:dynamic mark-with [key v]
+  (if (= (second v) key)
+    v
+    (into (conj [] (first v) key) (vec (rest v)))))
 
 (defn ^:dynamic add-element [item v]
   (cond
-    (= 1 (count v))  (conj v item)
+    (= 1 (count v)) (conj v item)
     (string? (last v)) (conj v item)
     (vector? (last v))
     (if (and (vector? item) (same-head (last v) item))
       (conj (vec (drop-last v)) (merge-enclosable (merge-item (last v) item)))
       (conj (vec (drop-last v)) (add-element item (last v))))))
-

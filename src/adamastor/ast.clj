@@ -60,23 +60,16 @@
               (rest lines))
 
           :else ;we have ourselves a blank line
-          (if (nil? (first (rest lines)))
-            quoted-items
-            (when-let [next-item ;; if next line is another standard item
-                       (some #(% (first (rest lines))) [standard-blockquote unmarked-blockquote])]
+            (if (nil? (first (rest lines)))
+              quoted-items
+              (if-let [next-item ;; if next line is another standard item
+                      (some #(% (first (rest lines))) [standard-blockquote unmarked-blockquote])]
                 (recur
                   (conj
-                    (vec (drop-last quoted-items))
-                    (enclose :p (last quoted-items))
-                    (enclose :p (into [:qi ] (:text next-item))))
+                    (mark-with :p quoted-items)
+                    (into [:qi ] (:text next-item)))
                   (drop 1 (rest lines)))
-              ) ;when-let
-            ); if
-          ) ;cond
-        ) ; if-let
-      ) ;if
-    ) ;loop
-  )
+                quoted-items)))))))
 
 (defn ^:dynamic blockquote [lines]
   "Markdown uses email-style > characters for blockquoting. It looks best if you
@@ -116,7 +109,8 @@
          lines lines]
     (if (empty? lines)
       list-items
-      (if-let [item-as-map (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item blank-item])]
+      (if-let [item-as-map
+               (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item blank-item])]
         (cond
           (not (nil? (:marker item-as-map)))
             (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
@@ -126,14 +120,14 @@
               (rest lines))
 
           :else
-            (when-let [next-item ;; if next line is another standard item
+            (if-let [next-item ;; if next line is another standard item
                       (some #(% (first (rest lines))) [unordered-list-item ordered-list-item unmarked-item])]
               (recur
                 (conj
-                  (vec (drop-last list-items))
-                  (enclose :p (last list-items))
-                  (enclose :p (into [:li ] (:text next-item))))
-                (drop 1 (rest lines)))))
+                  (mark-with :p list-items)
+                  (into [:li ] (:text next-item)))
+                (drop 1 (rest lines)))
+              list-items))
         [list-items lines]))))
 
 (defn ^:dynamic list-block [lines]

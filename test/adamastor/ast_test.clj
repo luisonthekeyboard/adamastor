@@ -66,28 +66,28 @@
   (is (not= (list-block ["* item" "    * item"]) [[:ul [:li "item"] [:li "item"]]]))
   (is (= (list-block ["1. item" "another  " "another" "2. final"]) [:ol [:li "item" "another" :br "another"] [:li "final"]]))
   (is (= (list-block ["* 111  " "1 e meio" "" "* 222"])
-         [:ul [:li [:p "111" :br "1 e meio"]] [:li [:p "222"]]]))
+         [:ul :p [:li "111" :br "1 e meio"] [:li "222"]]))
   (is (= (list-block ["* 111  " "1 e meio" "" "* 222" "* 333"]))
-         [:ul [:li [:p "111" :br "1 e meio"]] [:li [:p "222"]] [:li "333"]])
+         [:ul :p [:li "111" :br "1 e meio"] [:li "222"] [:li "333"]])
   (is (= (list-block ["* 111  " "1 e meio" "" "* 222" "" "* 333"]))
-         [:ul [:li [:p "111" :br "1 e meio"]] [:li [:p "222"]] [:li [:p "333"]]])
+         [:ul :p [:li "111" :br "1 e meio"] [:li "222"] [:li "333"]])
   (is (= (list-block ["* 111" "222" "333" "        " "444" "555" "\t\t\t\t\t" "* 666"])
-         [:ul [:li [:p "111" "222" "333"]] [:li [:p "444" "555"]] [:li [:p "666"]]]))
+         [:ul :p [:li "111" "222" "333"] [:li "444" "555"] [:li "666"]]))
   (is (= (list-block ["* 111" "\t222" "\t333" "\t35353535" "" "444" "555" "" "* 666"])
-          [:ul [:li [:p "111" "222" "333" "35353535"]] [:li [:p "444" "555"]] [:li [:p "666"]]]))
+          [:ul :p [:li "111" "222" "333" "35353535"] [:li "444" "555"] [:li "666"]]))
   (is (= (list-block ["* 111" "\t222" "\t333" "\t35353535" "" "444" "555" "" "* 666" "*different thing"])
-         [:ul [:li [:p "111" "222" "333" "35353535"]] [:li [:p "444" "555"]] [:li [:p "666" "*different thing"]]]))
+         [:ul :p [:li "111" "222" "333" "35353535"] [:li "444" "555"] [:li "666" "*different thing"]]))
   (is (= (list-block ["* 111" "\t222" "\t333" "\t35353535" "" "444" "555" "" "* 666" "* different thing"])
-         [:ul [:li [:p "111" "222" "333" "35353535"]] [:li [:p "444" "555"]] [:li [:p "666"]] [:li "different thing"]])))
+         [:ul :p [:li "111" "222" "333" "35353535"] [:li "444" "555"] [:li "666"] [:li "different thing"]])))
 
 (deftest test-blockquotes
   (is (= (blockquote ["   > luis" "bipi"]) [:blockquote [:qi "luis" "bipi"]]))
   (is (= (blockquote ["   > luis" "> bipi"]) [:blockquote [:qi "luis" "bipi"]]))
   (is (= (blockquote ["   > luis" ">bipi"]) [:blockquote [:qi "luis" "bipi"]]))
   (is (= (blockquote ["> luis" "bipi" "" "> teofilo"])
-         [:blockquote [:qi [:p "luis" "bipi"]] [:qi [:p "teofilo"]]]))
+         [:blockquote :p [:qi "luis" "bipi"] [:qi "teofilo"]]))
   (is (= (blockquote ["> luis" "bipi" "" "> teofilo" "nothing" "under" "the sun" "       " "> and one more"])
-      [:blockquote [:qi [:p "luis" "bipi"]] [:qi [:p "teofilo" "nothing" "under" "the sun"]] [:qi [:p "and one more"]]]))
+      [:blockquote :p [:qi "luis" "bipi"] [:qi "teofilo" "nothing" "under" "the sun"] [:qi "and one more"]]))
   (is (= (blockquote ["> luis" "bipi" "> teofilo" "nothing" "under" "the sun" "> and one more"])
           [:blockquote [:qi "luis" "bipi" "teofilo" "nothing" "under" "the sun" "and one more"]]))
   (is (= (blockquote ["> luis" "bipi" "> teofilo" "nothing  " "under  " "the sun" "> and one more"])
@@ -99,4 +99,38 @@
   (is (= (blockquote ["> test" "### mega suren" "faren  " "> meran"])
       [:blockquote [:qi "test" [:h3 "mega suren" ()] "faren" :br "meran"]]))
   (is (= (blockquote ["> luis" "bipi" "teofilo" "" "under" "the sun" "and one more" "" "and" "finaly"])
-        [:blockquote [:qi [:p "luis" "bipi" "teofilo"]] [:qi [:p "under" "the sun" "and one more"]] [:qi [:p "and" "finaly"]]])))
+        [:blockquote :p [:qi "luis" "bipi" "teofilo"] [:qi "under" "the sun" "and one more"] [:qi "and" "finaly"]]))
+  (is (= (blockquote ["> # title" "" "> In the beggining the was nothing  " "Then John created Lisp" "> ## title 2" "Then came Rich and created Clojure" "" "> And Rich was happy"])
+        [:blockquote :p [:qi [:h1 "title" ()]] [:qi "In the beggining the was nothing" :br "Then John created Lisp" [:h2 "title 2" ()] "Then came Rich and created Clojure"] [:qi "And Rich was happy"]]))
+  (is (= (blockquote ["> luis" "> bipi" "> " "> "])
+        [:blockquote [:qi "luis" "bipi"]]))
+  (is (= (blockquote ["> luis" "> bipi" "> " "> teofilo" "> popi"])
+        [:blockquote :p [:qi "luis" "bipi"] [:qi "teofilo" "popi"]]))
+  (is (= (blockquote ["> title" "" "> In the beggining the was nothing  " "Then John created Lisp" "> title 2" "Then came Rich and created Clojure" "" "And Rich was happy"])
+        [:blockquote :p [:qi "title"] [:qi "In the beggining the was nothing" :br "Then John created Lisp" "title 2" "Then came Rich and created Clojure"] [:qi "And Rich was happy"]]))
+  )
+
+(blockquote [
+              "> # title"
+              ""
+              "> In the beggining the was nothing  "
+              "Then John created Lisp"
+              "> ## title 2"
+              "Then came Rich and created Clojure"
+              ""
+              "> And Rich was happy"])
+
+
+[:blockquote
+ :p
+ [:qi
+  [:h1 "title" ()]]
+
+ [:qi
+  "In the beggining the was nothing"
+  :br
+  "Then John created Lisp"
+  [:h2 "title 2" ()]
+  "Then came Rich and created Clojure"]
+
+ [:qi "And Rich was happy"]]
