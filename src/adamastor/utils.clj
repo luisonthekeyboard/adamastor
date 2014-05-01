@@ -1,5 +1,5 @@
 (ns adamastor.utils
-  (:use [clojure.string :only [trim triml trimr split join]])
+  (:use [clojure.string :only [trim triml trimr split join blank?]])
   (:import java.lang.Character))
 
 (def hash-ending-string #"^(.*) (#+)$")
@@ -102,7 +102,9 @@
     (join (rest (triml string)))
     string))
 
-;(defn ^:dynamic strip-starting-quotes [lines]
-;  (when-not (every? blank? (take 2 lines))
-;
-;    ))
+(defn ^:dynamic strip-starting-quotes [lines]
+  (loop [stripped []
+         lines lines]
+    (if (every? blank? (take 2 lines))
+      (into stripped lines)
+      (recur (conj stripped (strip-starting-quote (first lines))) (rest lines)))))
