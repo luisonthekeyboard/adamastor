@@ -24,5 +24,30 @@
   (is (= (strip-ending-hashes "abbaabb") "abbaabb"))
   (is (= (strip-ending-hashes "###### abbaabb") "###### abbaabb"))
   (is (= (strip-ending-hashes "abbaabb #########") "abbaabb"))
-  (is (= (strip-ending-hashes "abbaabb#########") "abbaabb#########"))
-  )
+  (is (= (strip-ending-hashes "abbaabb#########") "abbaabb#########")))
+
+(deftest test-same-head
+  (is (true? (same-head [:li "suren"] [:li "faren"])))
+  (is (false? (same-head [:li "suren"] ["faren" :li]))))
+
+(deftest test-merge
+  (is (= (merge-item [:li "suren" "faren"] [:l1 "guren"])
+        [:li "suren" "faren" "guren"]))
+  (is (= (merge-item [:li "faren"] [:l1 "guren" [:p "meran"]])
+        [:li "faren" "guren" [:p "meran"]])))
+
+(deftest test-is-enclosing
+  (is (true? (is-enclosing [:p "suren"])))
+  (is (true? (is-enclosing [:p "suren" "faren"])))
+  (is (false? (is-enclosing [:faren "suren" "faren"])))
+  (is (false? (is-enclosing ["suren" "faren"])))
+  (is (false? (is-enclosing "suren")))
+  (is (false? (is-enclosing :guren))))
+
+(deftest test-merge-enclosable
+  (is (= (merge-enclosable [:li [:p "suren"] "faren"])
+        [:li [:p "suren" "faren"]]))
+  (is (= (merge-enclosable [:li [:p "suren" :br "meran"] "faren"])
+        [:li [:p "suren" :br "meran" "faren"]]))
+  (is (= (merge-enclosable [:li [:h1 "suren"] "faren"])
+        [:li [:h1 "suren"] "faren"])))

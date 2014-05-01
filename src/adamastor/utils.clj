@@ -3,6 +3,7 @@
   (:import java.lang.Character))
 
 (def hash-ending-string #"^(.*) (#+)$")
+(def enclosable [:p])
 
 ; to be deleted
 (defn get-text-from-file []
@@ -67,24 +68,27 @@
     v
     (conj [(first v)] (into [elm] (rest v)))))
 
-(defn ^:dynamic merge-item [item v] ; should be made loop-recurred
-  (if (vector? (last v))
-    (conj
-      (vec (drop-last v))
-      (merge-item item (last v)))
-    (into v item)))
+(defn ^:dynamic same-head [v1 v2]
+  (= (first v1) (first v2)))
+
+(defn ^:dynamic merge-item [v1 v2]
+  (into (into [(first v1)] (rest v1)) (rest v2)))
+
+(defn ^:dynamic is-enclosing [v]
+  (some? (some (fn [element] (and (vector? v) (= (first v) element))) enclosable)))
+
+(defn ^:dynamic merge-enclosable [v]
+  (if (and (is-enclosing (second (reverse v))) (string? (last v)))
+    (conj (vec (drop-last 2 v)) (conj (second (reverse v)) (last v)))
+    v))
+
 
 (defn ^:dynamic add-element [item v]
   (cond
     (= 1 (count v))  (conj v item)
     (string? (last v)) (conj v item)
     (vector? (last v))
-      (if (and (vector? item) (= (first (last v)) (first item)))
-        (merge-item (drop 1 item) v)
-        (conj
-          (vec (drop-last v))
-          (add-element item (last v))))
+    (if (and (vector? item) (same-head (last v) item))
+      (conj (vec (drop-last v)) (merge-enclosable (merge-item (last v) item)))
+      (conj (vec (drop-last v)) (add-element item (last v))))))
 
-
-    )
-  )

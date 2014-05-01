@@ -10,6 +10,21 @@
 (def ol #"^ {0,3}([0-9]+\.)( +|\t)(.+)$")
 (def blockquote-line #"^ {0,3}>(.+)$")
 
+(defn ^:dynamic atx-header [lines]
+  "Atx-style headers use 1-6 hash characters at the start
+  of the line,  corresponding to header levels 1-6. Optionally,
+  you may “close” atx-style headers. This is pu rely cosmetic
+  — you can use this if you think it looks better. The closing
+  hashes don’t even need to match the number of hashes used
+  to open the header. Luis: semantics for more than 6 # is that
+  they are shortened to only 6."
+  (let [first-line (strip-ending-hashes (first lines)) ;I would prefer to ditch `strip-ending-hashes` and do the whole regexp in `ast-header-line`
+        tail (rest lines)]
+    (when-let [[line hashes header]
+               (re-matches ast-header-line first-line)]
+      [(keyword (str "h" (min 6 (count (trim hashes))))) (trim header) tail])))
+
+
 (defn ^:dynamic standard-blockquote [str]
   (when-not (= ">" (trim str))
     (when-let [parts (re-matches blockquote-line str)]
@@ -25,6 +40,12 @@
   (when (or (blank? str) (= ">" (trim str)))
     {:text nil}))
 
+(defn ^:dynamic parse-text [text]
+  (if-let [parsed (some #(% text  ) [atx-header])]
+    [parsed]
+    text))
+
+
 (defn ^:dynamic blockquote-item [quoted-items lines]
   (loop [quoted-items quoted-items
          lines lines]
@@ -34,9 +55,9 @@
 
         (cond
           (not (nil? (:text item-as-map)))
-              (recur
-                (add-element (into [:qi ] (:text item-as-map)) quoted-items)
-                (rest lines))
+            (recur
+              (add-element (into [:qi ] (parse-text (:text item-as-map))) quoted-items)
+              (rest lines))
 
           :else ;we have ourselves a blank line
           (if (nil? (first (rest lines)))
@@ -101,9 +122,7 @@
             (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
           (not (nil? (:text item-as-map)))
             (recur
-              (conj
-                (vec (drop-last list-items))
-                (merge-item (:text item-as-map) (last list-items)))
+              (add-element (into [:li ] (:text item-as-map)) list-items)
               (rest lines))
 
           :else
