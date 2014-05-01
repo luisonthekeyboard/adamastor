@@ -58,10 +58,10 @@
 
 (deftest test-strip-starting-quotes
   (is (= (strip-starting-quotes ["> test" ">   suren" "   > faren" "> 1. guren" "> ## meran"])
-        [" test" "   suren" " faren" " 1. guren" " ## meran"]))
+        [[" test" "   suren" " faren" " 1. guren" " ## meran"] []]))
   (is (= (strip-starting-quotes ["" "" "> test" ">   suren" "   > faren" "> 1. guren" "> ## meran"])
-        ["" "" "> test" ">   suren" "   > faren" "> 1. guren" "> ## meran"]))
+        [[]["" "" "> test" ">   suren" "   > faren" "> 1. guren" "> ## meran"]]))
   (is (= (strip-starting-quotes ["> test" ">   suren" "   > faren" "\n\t" "     " "> 1. guren" "> ## meran"])
-        [" test" "   suren" " faren" "\n\t" "     " "> 1. guren" "> ## meran"]))
+        [[" test" "   suren" " faren"] ["\n\t" "     " "> 1. guren" "> ## meran"]]))
   (is (= (strip-starting-quotes ["> > ## meran"])
-        [" > ## meran"])))
+        [[" > ## meran"] []])))

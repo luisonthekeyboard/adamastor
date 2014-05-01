@@ -106,5 +106,5 @@
   (loop [stripped []
          lines lines]
     (if (every? blank? (take 2 lines))
-      (into stripped lines)
+      [stripped (vec lines)]
       (recur (conj stripped (strip-starting-quote (first lines))) (rest lines)))))
