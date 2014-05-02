@@ -8,7 +8,4 @@
     args
     nil))
 
-;(defn ^:dynamic parse [lines]
-;  (when-let [[result remaining]
-;             (some (fn [matcher] (matcher lines)) matchers)]
-;    (cons result (parse remaining))))
+

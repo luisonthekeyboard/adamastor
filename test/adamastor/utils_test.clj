@@ -2,9 +2,6 @@
   (:use clojure.test
         adamastor.utils))
 
-(deftest test-get-text-from-file
-  (is (not (nil? (get-text-from-file)))))
-
 (deftest test-remove-whitespaces
   (is (= "token" (remove-whitespaces "   to   ken  \t ")))
   (is (= "token" (remove-whitespaces "   to \n  ken")))

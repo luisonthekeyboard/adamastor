@@ -6,19 +6,15 @@
 (def enclosable [:p ])
 (def blockquote-line #"^ {0,3}>(.+)$")
 
-; to be deleted
-(defn get-text-from-file []
-  (clojure.string/split-lines
-    (slurp "./resources/test.md")))
-
-
 (defn ^:dynamic strip-ending-hashes [string]
   "Takes a string (possibly) ending with /space hash/ and returns a copy
    without that ending."
-  (if-let [[whole-string minus-hashes hashes]
-           (re-matches hash-ending-string string)]
-    minus-hashes
-    string))
+  (if-not (string? string)
+    string
+    (if-let [[whole-string minus-hashes hashes]
+             (re-matches hash-ending-string string)]
+      minus-hashes
+      string)))
 
 
 (defn ^:dynamic matches [regexp string]
