@@ -11,22 +11,6 @@
 (def ul #"^ {0,3}(\*|\+|-)( +|\t)(.+)$")
 (def ol #"^ {0,3}([0-9]+\.)( +|\t)(.+)$")
 
-
-(defn ^:dynamic atx-header [lines]
-  "Atx-style headers use 1-6 hash characters at the start
-  of the line,  corresponding to header levels 1-6. Optionally,
-  you may “close” atx-style headers. This is pu rely cosmetic
-  — you can use this if you think it looks better. The closing
-  hashes don’t even need to match the number of hashes used
-  to open the header. Luis: semantics for more than 6 # is that
-  they are shortened to only 6."
-  (let [first-line (strip-ending-hashes (first lines)) ;I would prefer to ditch `strip-ending-hashes` and do the whole regexp in `ast-header-line`
-        tail (rest lines)]
-    (when-let [[line hashes header]
-               (re-matches ast-header-line first-line)]
-      [(keyword (str "h" (min 6 (count (trim hashes))))) (trim header) tail])))
-
-
 (defn ^:dynamic standard-blockquote [str]
   (when-not (= ">" (trim str))
     (when-let [parts (re-matches blockquote-line str)]
