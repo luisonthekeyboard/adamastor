@@ -4,7 +4,7 @@
 
 (def hash-ending-string #"^(.*) (#+)$")
 (def enclosable [:p ])
-(def blockquote-line #"^ {0,3}> (.*)$")
+(def blockquote-line #"^ {0,3}>( (.*))?$")
 
 (defn ^:dynamic strip-ending-hashes [string]
   "Takes a string (possibly) ending with /space hash/ and returns a copy
@@ -24,6 +24,10 @@
     (nil? regexp) false
     (nil? string) false
     :else (not (nil? (re-matches regexp string)))))
+
+(not (=
+[[:blockquote [:h1 "luis"] [:p "bipi"] :blankline [:p "teofilo" "tadzio"]] :blankline :blankline]
+[[:p "> # luis" "> bipi" ">" "> teofilo" "> tadzio"] :blankline :blankline]))
 
 
 (defn break [string]

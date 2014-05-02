@@ -58,19 +58,20 @@
                (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item blank-item])]
         (cond
           (not (nil? (:marker item-as-map)))
-          (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
+            (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
           (not (nil? (:text item-as-map)))
-          (recur
-            (add-element (into [:li ] (:text item-as-map)) list-items)
-            (rest lines))
-          :else (if-let [next-item ;; if next line is another standard item
-                         (some #(% (first (rest lines))) [unordered-list-item ordered-list-item unmarked-item])]
-                  (recur
-                    (conj
-                      (mark-with :p list-items)
-                      (into [:li ] (:text next-item)))
-                    (drop 1 (rest lines)))
-                  list-items))
+            (recur
+              (add-element (into [:li ] (:text item-as-map)) list-items)
+              (rest lines))
+          :else ; blank line
+            (if-let [next-item ;; if next line is another standard item
+                     (some #(% (first (rest lines))) [unordered-list-item ordered-list-item unmarked-item])]
+              (recur
+                (conj
+                  (mark-with :p list-items)
+                  (into [:li ] (:text next-item)))
+                (drop 1 (rest lines)))
+              list-items))
         [list-items lines]))))
 
 (defn ^:dynamic list-block [lines]
@@ -165,6 +166,7 @@
                horizontal-rule
                headers
                list-block
+               blockquote
                paragraph])
 
 (defn ^:dynamic parse [lines]
