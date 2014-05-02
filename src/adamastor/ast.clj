@@ -67,7 +67,7 @@
   (when (matches blockquote-line (first lines))
     (let [[blockquote-items tail]
           (strip-starting-quotes lines)]
-      [(conj [:blockquote ] (parse blockquote-items)) tail])))
+      [(into [:blockquote ] (parse blockquote-items)) tail])))
 
 (defn ^:dynamic unordered-list-item [str]
   (when-let [parts (re-matches ul str)]

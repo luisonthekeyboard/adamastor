@@ -4,7 +4,7 @@
 
 (def hash-ending-string #"^(.*) (#+)$")
 (def enclosable [:p ])
-(def blockquote-line #"^ {0,3}>(.+)$")
+(def blockquote-line #"^ {0,3}> (.*)$")
 
 (defn ^:dynamic strip-ending-hashes [string]
   "Takes a string (possibly) ending with /space hash/ and returns a copy
@@ -95,7 +95,7 @@
 
 (defn ^:dynamic strip-starting-quote [string]
   (if (matches blockquote-line string)
-    (join (rest (triml string)))
+    (join (drop 2 (triml string)))
     string))
 
 (defn ^:dynamic strip-starting-quotes [lines]

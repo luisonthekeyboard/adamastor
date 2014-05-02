@@ -50,15 +50,15 @@
         [:li [:h1 "suren"] "faren"])))
 
 (deftest test-strip-starting-quote
-  (is (= (strip-starting-quote "   > #luis") " #luis"))
+  (is (= (strip-starting-quote "   > #luis") "#luis"))
   (is (= (strip-starting-quote "    > #luis") "    > #luis")))
 
 (deftest test-strip-starting-quotes
   (is (= (strip-starting-quotes ["> test" ">   suren" "   > faren" "> 1. guren" "> ## meran"])
-        [[" test" "   suren" " faren" " 1. guren" " ## meran"] []]))
+        [["test" "  suren" "faren" "1. guren" "## meran"] []]))
   (is (= (strip-starting-quotes ["" "" "> test" ">   suren" "   > faren" "> 1. guren" "> ## meran"])
         [[]["" "" "> test" ">   suren" "   > faren" "> 1. guren" "> ## meran"]]))
   (is (= (strip-starting-quotes ["> test" ">   suren" "   > faren" "\n\t" "     " "> 1. guren" "> ## meran"])
-        [[" test" "   suren" " faren"] ["\n\t" "     " "> 1. guren" "> ## meran"]]))
+        [["test" "  suren" "faren"] ["\n\t" "     " "> 1. guren" "> ## meran"]]))
   (is (= (strip-starting-quotes ["> > ## meran"])
-        [[" > ## meran"] []])))
+        [["> ## meran"] []])))
