@@ -11,52 +11,6 @@
 (def ul #"^ {0,3}(\*|\+|-)( +|\t)(.+)$")
 (def ol #"^ {0,3}([0-9]+\.)( +|\t)(.+)$")
 
-(defn ^:dynamic standard-blockquote [str]
-  (when-not (= ">" (trim str))
-    (when-let [parts (re-matches blockquote-line str)]
-      {:text (break (triml (second parts)))})))
-
-(defn ^:dynamic unmarked-blockquote [str]
-  (when-not (= ">" (trim str))
-    (when (not (blank? str))
-      (when-let [parts (re-matches #"^(.+)$" str)]
-        {:text (break (triml (last parts)))}))))
-
-(defn ^:dynamic blank-line-blockquote [str]
-  (when (or (blank? str) (= ">" (trim str)))
-    {:text nil}))
-
-(defn ^:dynamic parse-text [text]
-  (if-let [parsed (some #(% text) [atx-header])]
-    [parsed]
-    text))
-
-
-(defn ^:dynamic blockquote-item [quoted-items lines]
-  (loop [quoted-items quoted-items
-         lines lines]
-    (if (empty? lines)
-      quoted-items
-      (if-let [item-as-map (some #(% (first lines)) [standard-blockquote unmarked-blockquote blank-line-blockquote])]
-
-        (cond
-          (not (nil? (:text item-as-map)))
-          (recur
-            (add-element (into [:qi ] (parse-text (:text item-as-map))) quoted-items)
-            (rest lines))
-
-          :else ;we have ourselves a blank line
-          (if (nil? (first (rest lines)))
-            quoted-items
-            (if-let [next-item ;; if next line is another standard item
-                     (some #(% (first (rest lines))) [standard-blockquote unmarked-blockquote])]
-              (recur
-                (conj
-                  (mark-with :p quoted-items)
-                  (into [:qi ] (:text next-item)))
-                (drop 1 (rest lines)))
-              quoted-items)))))))
-
 (defn ^:dynamic blockquote [lines]
   "Markdown uses email-style > characters for blockquoting. It looks best if you
   hard wrap the text and put a > before every line. Markdown allows you to be lazy
