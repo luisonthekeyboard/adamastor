@@ -108,11 +108,14 @@
     {:marker nil
      :text nil}))
 
+(defn ^:dynamic double-blank [lines]
+  (every? blank? (take 2 lines)))
+
 (defn ^:dynamic list-item [list-items lines]
   (loop [list-items list-items
          lines lines]
-    (if (empty? lines)
-      list-items
+    (if (or (empty? lines) (every? blank? (take 2 lines)))
+      [list-items lines]
       (if-let [item-as-map
                (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item blank-item])]
         (cond
@@ -122,7 +125,6 @@
           (recur
             (add-element (into [:li ] (:text item-as-map)) list-items)
             (rest lines))
-
           :else (if-let [next-item ;; if next line is another standard item
                          (some #(% (first (rest lines))) [unordered-list-item ordered-list-item unmarked-item])]
                   (recur
@@ -221,11 +223,11 @@
   (when (and (coll? lines) (blank? (first lines)))
     [:blankline (rest lines)]))
 
-(def matchers [
-                blank-line
-                horizontal-rule
-                headers
-                paragraph])
+(def matchers [blank-line
+               horizontal-rule
+               headers
+               list-block
+               paragraph])
 
 (defn ^:dynamic parse [lines]
   (loop [parsed []
