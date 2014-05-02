@@ -2,7 +2,7 @@
   (:use [adamastor.utils])
   (:use [clojure.string :only [triml trim blank?]]))
 
-(declare parse paragraph list-block blank-line horizontal-rule headers)
+(declare parse paragraph list-block blank-line horizontal-rule headers atx-header)
 
 (def line-not-preceeded-by-hash #"^(?!# ).*$")
 (def line-only-with-dashes #"^-+$")
