@@ -5,6 +5,7 @@
 (def hash-ending-string #"^(.*) (#+)$")
 (def enclosable [:p ])
 (def blockquote-line #"^ {0,3}>( (.*))?$")
+(def indented-line #"^\t(.+)$")
 
 (defn ^:dynamic strip-ending-hashes [string]
   "Takes a string (possibly) ending with /space hash/ and returns a copy
@@ -24,10 +25,6 @@
     (nil? regexp) false
     (nil? string) false
     :else (not (nil? (re-matches regexp string)))))
-
-(not (=
-[[:blockquote [:h1 "luis"] [:p "bipi"] :blankline [:p "teofilo" "tadzio"]] :blankline :blankline]
-[[:p "> # luis" "> bipi" ">" "> teofilo" "> tadzio"] :blankline :blankline]))
 
 
 (defn break [string]
@@ -105,6 +102,18 @@
 (defn ^:dynamic strip-starting-quotes [lines]
   (loop [stripped []
          lines lines]
-    (if (every? blank? (take 2 lines))
+    (if (or (empty? lines) (every? blank? (take 2 lines)))
       [stripped (vec lines)]
       (recur (conj stripped (strip-starting-quote (first lines))) (rest lines)))))
+
+(defn ^:dynamic unindent-line [line]
+  (if-let [match (re-matches indented-line line)]
+    (second match)
+      line))
+
+(defn ^:dynamic unindent-lines [lines]
+  (loop [processed []
+          remaining lines]
+    (if (or (empty? remaining) (every? blank? (take 2 remaining)))
+      [processed (vec remaining)]
+      (recur (conj processed (unindent-line (first lines))) (rest lines)))))

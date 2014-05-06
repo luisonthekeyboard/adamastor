@@ -62,3 +62,20 @@
         [["test" "  suren" "faren"] ["\n\t" "     " "> 1. guren" "> ## meran"]]))
   (is (= (strip-starting-quotes ["> > ## meran"])
         [["> ## meran"] []])))
+
+(deftest test-unindent-line
+  (is (= (unindent-line "\t\tluis") ) "\tluis")
+  (is (= (unindent-line "\t> luis") ) "> luis")
+  (is (= (unindent-line "\t") ) "\t")
+  (is (= (unindent-line "lalala") ) "lalala"))
+
+;(deftest test-unindent-lines
+;  (is (= (unindent-lines ["luis"]) [["luis"] []]))
+;  (is (= (unindent-lines ["\tluis"]) [["luis"]
+;    adamastor.core=> (unindent-lines ["\tluis" "\t"suren" "\t faren"])
+;            #_=>
+;
+;adamastor.core=> (unindent-lines ["\tluis" "\t suren" "\t faren"])
+;["luis" " suren" " faren"]
+;adamastor.core=> (unindent-lines ["\tluis" "\t suren" "\t faren" "" "" "\t suren"])
+;["luis" " suren" " faren" "" "" " suren"]

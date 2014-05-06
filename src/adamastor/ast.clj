@@ -63,15 +63,10 @@
             (recur
               (add-element (into [:li ] (:text item-as-map)) list-items)
               (rest lines))
-          :else ; blank line
-            (if-let [next-item ;; if next line is another standard item
-                     (some #(% (first (rest lines))) [unordered-list-item ordered-list-item unmarked-item])]
-              (recur
-                (conj
-                  (mark-with :p list-items)
-                  (into [:li ] (:text next-item)))
-                (drop 1 (rest lines)))
-              list-items))
+          (and (nil? (:marker item-as-map))(nil? (:text item-as-map)))
+            (recur (mark-with :p list-items) (rest lines))
+          :else
+            (prn "poopoo"))
         [list-items lines]))))
 
 (defn ^:dynamic list-block [lines]
