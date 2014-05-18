@@ -122,4 +122,6 @@
   (is (= (parse ["> 1. item 1" "> 2. Item 2"])
         [[:blockquote [:ol [:li "item 1"] [:li "Item 2"]]]]))
   (is (= (parse ["> * item" "> " "> * ditem"])
-        [[:blockquote [:ul [:li "item"] :p [:li "ditem"]]]])))
+        [[:blockquote [:ul [:li "item"] :p [:li "ditem"]]]]))
+  (is (= (parse ["> item" "> " "> > ditem"])
+        [[:blockquote [:p "item"] :blankline [:blockquote [:p "ditem"]]]])))
