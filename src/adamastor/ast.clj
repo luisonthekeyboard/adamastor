@@ -39,7 +39,7 @@
           (not (matches ast-header-line str)))
     (when-let [parts (re-matches #"^(.+)$" str)]
       {:marker nil
-       :text (break (triml (last parts)))})))
+       :text (break (last parts))})))
 
 (defn ^:dynamic blank-item [str]
   (when (blank? str)
@@ -54,6 +54,11 @@
 
 (defn ^:dynamic has-text [item-as-map]
   (not (nil? (:text item-as-map))))
+
+(defn ^:dynamic has-indented-text [item-as-map]
+  (and
+    (not (nil? (:text item-as-map)))
+    (matches indented-line (first (:text item-as-map)))))
 
 (defn ^:dynamic previous-has-marker [list-items]
   (and (vector? (last list-items))
@@ -78,6 +83,14 @@
             (recur
               (add-element (into [:li ] (:text item-as-map)) list-items)
               (rest lines))
+          (has-indented-text item-as-map)
+            (if (= (last list-items) :p)
+              (recur
+                (add-element (into [:li :p ] (:text item-as-map)) (drop-last list-items))
+                (rest lines))
+              (recur
+                (add-element (into [:li ] (:text item-as-map)) list-items)
+                (rest lines)))
           (no-marker-nor-text item-as-map)
             (recur (conj list-items :p ) (rest lines))
           :else

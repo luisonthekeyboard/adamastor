@@ -5,7 +5,7 @@
 (def hash-ending-string #"^(.*) (#+)$")
 (def enclosable [:p ])
 (def blockquote-line #"^ {0,3}>( (.*))?$")
-(def indented-line #"^\t(.+)$")
+(def indented-line #"^(\t| {4})(.+)$")
 
 (defn ^:dynamic strip-ending-hashes [string]
   "Takes a string (possibly) ending with /space hash/ and returns a copy
