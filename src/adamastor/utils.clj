@@ -67,7 +67,10 @@
     (conj [(first v)] (into [elm] (rest v)))))
 
 (defn ^:dynamic same-head [v1 v2]
-  (= (first v1) (first v2)))
+  (and
+    (vector? v1)
+    (vector? v2)
+    (= (first v1) (first v2))))
 
 (defn ^:dynamic merge-item [v1 v2]
   (into (into [(first v1)] (rest v1)) (rest v2)))
@@ -88,11 +91,11 @@
 (defn ^:dynamic add-element [item v]
   (cond
     (= 1 (count v)) (conj v item)
-    (string? (last v)) (conj v item)
+    (or (string? (last v)) (keyword? (last v))) (conj v item)
     (vector? (last v))
-    (if (and (vector? item) (same-head (last v) item))
-      (conj (vec (drop-last v)) (merge-enclosable (merge-item (last v) item)))
-      (conj (vec (drop-last v)) (add-element item (last v))))))
+      (if (and (vector? item) (same-head (last v) item))
+        (conj (vec (drop-last v)) (merge-enclosable (merge-item (last v) item)))
+        (conj (vec (drop-last v)) (add-element item (last v))))))
 
 (defn ^:dynamic strip-starting-quote [string]
   (if (matches blockquote-line string)

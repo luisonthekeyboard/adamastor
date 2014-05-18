@@ -81,7 +81,9 @@
   (is (= (parse ["* 111  " "1 e meio" "" "" "* 222"])
         [[:ul [:li "111" :br "1 e meio"]] :blankline :blankline  [:ul [:li "222"]]]))
   (is (= (parse ["* 111  " "1 e meio" "" "* 222"])
-        [[:ul [:li "111" :br "1 e meio"] :p [:li "222"]]])))
+        [[:ul [:li "111" :br "1 e meio"] :p [:li "222"]]]))
+  (is (= (parse ["* luis" "" " e bipi" " e teofilo"])
+        [[:ul [:li "luis"] :p] [:p " e bipi" " e teofilo"]])))
 
 (deftest test-blockquotes
   (is (= (blockquote ["   > luis" "bipi"]) [[:blockquote [:p "luis" "bipi"]][]]))

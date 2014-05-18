@@ -49,8 +49,20 @@
 (defn ^:dynamic double-blank [lines]
   (every? blank? (take 2 lines)))
 
-(defn ^:dynamic indented-block [lines]
-  )
+(defn ^:dynamic has-marker [item-as-map]
+  (not (nil? (:marker item-as-map))))
+
+(defn ^:dynamic has-text [item-as-map]
+  (not (nil? (:text item-as-map))))
+
+(defn ^:dynamic previous-has-marker [list-items]
+  (and (vector? (last list-items))
+    (= (first (last list-items)) :li)))
+
+(defn ^:dynamic no-marker-nor-text [item-as-map]
+  (and
+    (nil? (:marker item-as-map))
+    (nil? (:text item-as-map))))
 
 (defn ^:dynamic list-item [list-items lines]
   (loop [list-items list-items
@@ -58,18 +70,18 @@
     (if (or (empty? lines) (every? blank? (take 2 lines)))
       [list-items lines]
       (if-let [item-as-map
-               (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item blank-item indented-block])]
+               (some #(% (first lines)) [unordered-list-item ordered-list-item unmarked-item blank-item])]
         (cond
-          (not (nil? (:marker item-as-map)))
+          (has-marker item-as-map)
             (recur (conj list-items (into [:li ] (:text item-as-map))) (rest lines))
-          (not (nil? (:text item-as-map)))
+          (and (has-text item-as-map) (previous-has-marker list-items))
             (recur
               (add-element (into [:li ] (:text item-as-map)) list-items)
               (rest lines))
-          (and (nil? (:marker item-as-map))(nil? (:text item-as-map)))
-            (recur (conj list-items :p) (rest lines))
+          (no-marker-nor-text item-as-map)
+            (recur (conj list-items :p ) (rest lines))
           :else
-            (prn "poopoo"))
+            [list-items lines])
         [list-items lines]))))
 
 (defn ^:dynamic list-block [lines]
